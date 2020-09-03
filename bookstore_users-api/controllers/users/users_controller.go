@@ -1,8 +1,8 @@
 package users
 
 import (
-	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/invinciible/go-bookstore-api/bookstore_users-api/domain/users"
@@ -26,15 +26,23 @@ func CreateUsers(c *gin.Context) {
 		c.JSON(saveErr.Status, saveErr)
 		return
 	}
-
-	fmt.Println(user)
 	c.JSON(http.StatusCreated, result)
-
 }
 
 // GetUser get the user.
 func GetUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "Implement me!")
+	userID, userErr := strconv.ParseInt(c.Param("userId"), 10, 64)
+	if userErr != nil {
+		err := resterr.NewBadRequestError("User ID should be an integer")
+		c.JSON(err.Status, err)
+	}
+	result, getErr := services.GetUser(userID)
+
+	if getErr != nil {
+		c.JSON(getErr.Status, getErr)
+		return
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 // SearchUser finds user.
